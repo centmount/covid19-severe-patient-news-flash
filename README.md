@@ -1,5 +1,5 @@
 # covid19-severe-patient, news flash
-To make news flash of covid19 severe patient cases in Japan, send e-mail to your addresses. 
+To send news flash, get the data of covid19 severe patient cases in Japan and send e-mail to your addresses. 
 全国の新型コロナ重症者数の速報ニュースをメール送信するプログラム。
 
 厚労省の新型コロナ重症者数のオープンデータに昨日分が入力されるまで数値の取得を繰り返して、昨日分が入力された時点でメール送信する。
