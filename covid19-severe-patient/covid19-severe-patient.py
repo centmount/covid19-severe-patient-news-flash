@@ -57,10 +57,10 @@ def input_mail_address():
 # 厚労省の重症者数CSVデータの読み込み, 日付に合わせたデータの抽出
 def get_data(date):
     df_severe = pd.read_csv(url, encoding='utf-8')
-    df_severe['Date'] = pd.to_datetime(df_severe['Date']).dt.strftime('%Y-%m-%d')
-    df_date = df_severe[df_severe['Date'] == date]
-    df_date_all = df_date[df_date['Prefecture'] == 'ALL']
-    if len(df_date_all['Date']) != 0:
+    df_severe['Date'] = pd.to_datetime(df_severe['Date']).dt.strftime('%Y-%m-%d')  # 'Date'列を'%Y-%m-%d'の文字列に変換
+    df_date = df_severe[df_severe['Date'] == date]  # 日付指定でデータ抽出
+    df_date_all = df_date[df_date['Prefecture'] == 'ALL']  # 'Prefecture'列(都道府県)で'ALL'(全国)のデータを抽出
+    if len(df_date_all['Date']) != 0:  # 日付セルが空欄でない場合
         date_value = df_date_all.iloc[0][0]
         severe_cases_value = df_date_all.iloc[0][2]
         print(f'日付: {date_value}  重症者数: {severe_cases_value}') 
@@ -77,6 +77,7 @@ value3 = get_data(today)
 
 
 # 昨日のデータが更新されるまで、10秒ごとに繰り返し実行
+# 戻り値(日付, 重症者数)がタプル型になっているかどうか、戻り値（重症者数）は数値型になっている（文字列ではない）かどうかで判断
 def repeat_get_data():
     global value2
     while type(value2) != tuple or type(value2[1]) == str:
