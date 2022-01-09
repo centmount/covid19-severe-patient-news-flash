@@ -33,9 +33,10 @@ daybeforeyesterday_datetime = today_datetime - timedelta(days=2)
 
 # 日付はフォーマットを統一して比較するため文字列に
 # 厚労省データに合わせて、日付は0埋めなしフォーマット
-today = today_datetime.strftime('%Y-%m-%d')
-yesterday = yesterday_datetime.strftime('%Y-%m-%d')
-daybeforeyesterday = daybeforeyesterday_datetime.strftime('%Y-%m-%d')
+today = today_datetime.strftime('%Y/%-m/%-d')
+yesterday = yesterday_datetime.strftime('%Y/%-m/%-d')
+daybeforeyesterday = daybeforeyesterday_datetime.strftime('%Y/%-m/%-d')
+
 
 # データの取得元
 url = 'https://covid19.mhlw.go.jp/public/opendata/severe_cases_daily.csv'
