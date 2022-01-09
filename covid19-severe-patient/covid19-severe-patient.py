@@ -7,7 +7,7 @@
 
 ※データが更新されるまで、10秒ごとに「データがありません」と表示されます。
 
-出典：厚生労働省　新型コロナ重症者数オープンデータ
+出典: 厚生労働省 新型コロナ重症者数オープンデータ
 https://covid19.mhlw.go.jp/public/opendata/severe_cases_daily.csv
 '''
 
@@ -32,6 +32,7 @@ yesterday_datetime = today_datetime - timedelta(days=1)
 daybeforeyesterday_datetime = today_datetime - timedelta(days=2)
 
 # 日付はフォーマットを統一して比較するため文字列に
+# 厚労省データに合わせて、日付は0埋めなしフォーマット
 today = today_datetime.strftime('%Y-%m-%d')
 yesterday = yesterday_datetime.strftime('%Y-%m-%d')
 daybeforeyesterday = daybeforeyesterday_datetime.strftime('%Y-%m-%d')
@@ -57,18 +58,15 @@ def input_mail_address():
 # 厚労省の重症者数CSVデータの読み込み, 日付に合わせたデータの抽出
 def get_data(date):
     df_severe = pd.read_csv(url, encoding='utf-8')
-    df_severe['Date'] = pd.to_datetime(df_severe['Date']).dt.strftime('%Y-%m-%d')
     df_date = df_severe[df_severe['Date'] == date]
-    df_date_all = df_date[df_date['Prefecture'] == 'ALL']
-    if len(df_date_all['Date']) != 0:
-        date_value = df_date_all.iloc[0][0]
-        severe_cases_value = df_date_all.iloc[0][2]
+    if len(df_date['Date']) != 0:
+        date_value = df_date.iloc[0][0]
+        severe_cases_value = df_date.iloc[0][1]
         print(f'日付: {date_value}  重症者数: {severe_cases_value}') 
         return date_value, severe_cases_value
     else:
-        print(f'日付: {date}  データがありません')
+        print('データがありません')
         return 'None'
-
 
 # グローバル変数に代入（初期化）
 value1 = get_data(daybeforeyesterday)
@@ -77,18 +75,20 @@ value3 = get_data(today)
 
 
 # 昨日のデータが更新されるまで、10秒ごとに繰り返し実行
-def repeat_get_data():
-    global value2
-    while type(value2) != tuple or type(value2[1]) == str:
-        value2 = get_data(yesterday)
+def repeat_get_data(new_value):
+    while type(new_value) != tuple:
+        new_value = get_data(yesterday)
         time.sleep(10)
-    return value2
+    return new_value
+
+# グローバル変数に代入
+new_value = repeat_get_data(value2)
 
 # gmailを使ってメールを送信
-def sendGmailAttach():
+def sendGmailAttach(last_value):
     to = my_address  # 送信先メールアドレス
-    sub = '厚労省：新型コロナ重症者数' #メール件名
-    body = f'厚労省：新型コロナ重症者数 \n 日付: {value1[0]}  重症者数: {value1[1]} \n 日付: {value2[0]}  重症者数: {value2[1]}  前日比: {value2[1] - value1[1]} \n\n ※厚労省オープンデータから自動取得しています' # メール本文
+    sub = '厚労省: 新型コロナ重症者数' #メール件名
+    body = f'厚労省: 新型コロナ重症者数 \n 日付: {value1[0]}  重症者数: {value1[1]} \n 日付: {last_value[0]}  重症者数: {last_value[1]}  前日比: {last_value[1] - value1[1]} \n\n ※厚労省オープンデータから自動取得しています' # メール本文
     host, port = 'smtp.gmail.com', 587
 
     # メールヘッダー
@@ -110,8 +110,8 @@ def sendGmailAttach():
 
 def main():
     input_mail_address()
-    repeat_get_data()
-    sendGmailAttach()
+    repeat_get_data(value2)
+    sendGmailAttach(new_value)
     print('メールが送信されました')
 
 if __name__ == "__main__":
